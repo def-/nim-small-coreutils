@@ -31,7 +31,7 @@ proc build(platform: Platform) =
     if name in ["panicoverride", "stdlib"]:
       continue
 
-    direShell nim, "--verbosity:0 --hints:off --nolinking --os:standalone -d:release --passC:-Os --noMain --passC:-ffunction-sections --passC:-fdata-sections c", file
+    direShell nim, "--verbosity:0 --hints:off --nolinking --os:standalone -d:release --opt:size --noMain --passC:-ffunction-sections --passC:-fdata-sections c", file
     direShell ld, "--gc-sections -e _start -T", scriptFile, "-o", payloadFile, objFile, objStdlibFile
     direShell "objcopy -j combined -O binary", payLoadFile, payLoadBin
 
