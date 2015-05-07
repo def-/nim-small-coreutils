@@ -22,9 +22,9 @@ template `[]=`[T](p: ptr T, off: int, val: T) =
 
 # File Descriptors
 const
-  stdin = 0
-  stdout = 1
-  stderr = 2
+  stdin: cint = 0
+  stdout: cint = 1
+  stderr: cint = 2
 
 # Syscalls
 
@@ -33,6 +33,9 @@ proc exit(n: cint) {.inline, noReturn.} =
 
 proc write(fd: cint, buf: cstring, len: csize): clong {.inline, discardable.} =
   syscall(WRITE, fd, buf, len)
+
+proc open(pathname: cstring, flags, mode: cint): cint {.inline.} =
+  syscall(OPEN, pathname, flags, mode).cint
 
 # Stdlib
 
@@ -66,10 +69,11 @@ proc add[S](s: var CharBuf[S], x: char) =
   if s.pos >= S:
     s.flush()
 
-proc add[S](s: var CharBuf[S], x: cstring) =
-  for i in 0 .. int.high:
-    if x[i] == '\0': return
-    s.add x[i]
+proc add[S](s: var CharBuf[S], xs: varargs[cstring]) =
+  for x in xs:
+    for i in 0 .. int.high:
+      if x[i] == '\0': return
+      s.add x[i]
 
 macro includeIt: stmt =
   const file = staticExec("echo $file")
