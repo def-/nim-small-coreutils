@@ -1,4 +1,4 @@
 import stdlib
 
-proc main {.exportc: "_start".} =
+proc main(argc: cint, argv: cstringArray): cint {.exportc.} =
   exit 0

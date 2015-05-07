@@ -1,6 +1,6 @@
 import stdlib
 
-proc main(argc: int, argv: cstringArray): cint {.inline.} =
+proc main(argc: cint, argv: cstringArray): cint {.exportc.} =
   var
     start = 1
     newLine = true
@@ -16,6 +16,4 @@ proc main(argc: int, argv: cstringArray): cint {.inline.} =
 
   if newLine:
     stdout.write "\n", 1
-  return 0
-
-init()
+  exit 0

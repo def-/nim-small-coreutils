@@ -1,5 +1,12 @@
 import syscall
 
+when defined(x86_64):
+  {.compile: "tools/x86_64/start.s".}
+elif defined(x86):
+  {.compile: "tools/x86/start.s".}
+else:
+  error "No _start defined for this architecture"
+
 template `+`*[T](p: ptr T, off: int): ptr T =
   cast[ptr type(p[])](cast[ByteAddress](p) +% off * sizeof(p[]))
 
@@ -38,12 +45,12 @@ proc strcmp*(a, b: cstring): int =
     if a[i] == '\0' and b[i] == '\0':
       return 0
     if a[i] < b[i]:
-      return -i
+      return -1
     if a[i] > b[i]:
-      return i
+      return 1
 
 template init* {.dirty, immediate.} =
-  proc stdmain*(argc: int, argv: cstringArray): cint =
+  proc stdmain*(argc: cint, argv: cstringArray): cint =
     exit main(argc, argv)
 
   proc start* {.exportc: "_start".} =
@@ -61,7 +68,7 @@ template init* {.dirty, immediate.} =
         "xorl %ebp, %ebp\n"
         "popl %esi\n"       // Pop argc
         "movl %esp, %ecx\n" // argv starts at the current stack top
-        "andl $~15, %esp\n" // align stack to a 16 byte boundary
+        "andl $0xfffffff0, %esp\n" // align stack to a 16 byte boundary
         "pushl %eax\n"      // Push garbage
         "pushl %esp\n"      // Provide highest stack address to user code
         "pushl %ecx\n"      // argv

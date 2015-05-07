@@ -26,21 +26,22 @@ proc build(platform: Platform) =
       (_, name, ext) = splitFile file
       objFile = "src/nimcache" / name & ".o"
       objStdlibFile = "src/nimcache/stdlib.o"
+      objStartFile = "src/nimcache/start.o"
       outFile = "bin" / $platform / name
 
     if name in ["panicoverride", "stdlib"]:
       continue
 
-    direShell nim, "--verbosity:0 --hints:off --nolinking --os:standalone -d:release --opt:size --noMain --passC:-ffunction-sections --passC:-fdata-sections c", file
-    direShell ld, "--gc-sections -e _start -T", scriptFile, "-o", payloadFile, objFile, objStdlibFile
+    direShell nim, "--verbosity:0 --hints:off --parallelBuild:1 --nolinking --os:standalone -d:release --opt:size --noMain --passC:-ffunction-sections --passC:-fdata-sections c", file
+    direShell ld, "--gc-sections -e _start -T", scriptFile, "-o", payloadFile, objFile, objStdlibFile, objStartFile
     direShell "objcopy -j combined -O binary", payLoadFile, payLoadBin
 
     var entry: string
     for line in splitLines execProcess "nm -f posix src/nimcache/payload":
       if line.startsWith "_start ":
         entry = line.split(" ")[2]
-
     direShell "nasm -f bin -o", outFile, "-D entry=0x" & entry, elfFile
+
     inclFilePermissions outFile, {fpUserExec, fpGroupExec, fpOthersExec}
 
 task "clean", "Clean up build directories":
