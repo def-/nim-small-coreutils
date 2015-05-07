@@ -1,17 +1,6 @@
-type StackBuf*[S: static[int], T] = object
-  buf*: array[S, T]
-  pos*: int
-
-proc add[S](s: var StackBuf[S, char], x: char) =
-  s.buf[s.pos] = x
-  inc s.pos
-  if s.pos >= S:
-    stdout.write s.buf, s.pos
-    s.pos = 0
-
 proc main(argc: int, argv: cstringArray): int =
   var
-    buf: StackBuf[4096, char]
+    buf = CharBuf[4096](fd: stdout)
     start = 1
     newLine = true
 
@@ -49,5 +38,4 @@ proc main(argc: int, argv: cstringArray): int =
     if newLine:
       buf.add '\l'
 
-  stdout.write buf.buf, buf.pos
-  result = 0
+  buf.flush()

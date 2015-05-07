@@ -4,9 +4,11 @@ This uses the methods from [my blog post](http://hookrace.net/blog/nim-binary-si
 
 | Tool | Size glibc | Size x86 | Size x86_64 |
 | ---- | ----------:| --------:| -----------:|
-| true |      27 KB |     97 B |       129 B |
-| false|      27 KB |     97 B |       132 B |
-| echo |      31 KB |    656 B |       800 B |
+| true |      27 KB |    100 B |       130 B |
+| false|      27 KB |    100 B |       133 B |
+| echo |      31 KB |    694 B |       822 B |
+| env  |      31 KB |    357 B |       366 B |
+| cat  |      51 KB |          |             |
 
 For quick testing you can compile like this:
 

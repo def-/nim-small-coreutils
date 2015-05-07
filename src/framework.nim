@@ -1,39 +1,46 @@
 import syscall, macros
 
-template `+`*[T](p: ptr T, off: int): ptr T =
+# Pointer arithmetic
+
+template `+`[T](p: ptr T, off: int): ptr T =
   cast[ptr type(p[])](cast[ByteAddress](p) +% off * sizeof(p[]))
 
-template `+=`*[T](p: ptr T, off: int) =
+template `+=`[T](p: ptr T, off: int) =
   p = p + off
 
-template `-`*[T](p: ptr T, off: int): ptr T =
+template `-`[T](p: ptr T, off: int): ptr T =
   cast[ptr type(p[])](cast[ByteAddress](p) -% off * sizeof(p[]))
 
-template `-=`*[T](p: ptr T, off: int) =
+template `-=`[T](p: ptr T, off: int) =
   p = p - off
 
-template `[]`*[T](p: ptr T, off: int): T =
+template `[]`[T](p: ptr T, off: int): T =
   (p + off)[]
 
-template `[]=`*[T](p: ptr T, off: int, val: T) =
+template `[]=`[T](p: ptr T, off: int, val: T) =
   (p + off)[] = val
 
+# File Descriptors
 const
-  stdin* = 0
-  stdout* = 1
-  stderr* = 2
+  stdin = 0
+  stdout = 1
+  stderr = 2
 
-proc exit*(n: cint) {.inline, noReturn.} =
+# Syscalls
+
+proc exit(n: cint) {.inline, noReturn.} =
   discard syscall(EXIT, n)
 
-proc write*(fd: cint, buf: cstring, len: csize): clong {.inline, discardable.} =
+proc write(fd: cint, buf: cstring, len: csize): clong {.inline, discardable.} =
   syscall(WRITE, fd, buf, len)
 
-proc strlen*(s: cstring): csize =
+# Stdlib
+
+proc strlen(s: cstring): csize =
   while s[result] != '\0':
     inc result
 
-proc strcmp*(a, b: cstring): int =
+proc strcmp(a, b: cstring): int =
   for i in 0 .. int.high:
     if a[i] == '\0' and b[i] == '\0':
       return 0
@@ -41,6 +48,28 @@ proc strcmp*(a, b: cstring): int =
       return -1
     if a[i] > b[i]:
       return 1
+
+# Helpers
+
+type CharBuf[S: static[int]] = object
+  buf: array[S, char]
+  pos: int
+  fd: cint
+
+proc flush[S](s: var CharBuf[S]) =
+  write s.fd, s.buf, s.pos
+  s.pos = 0
+
+proc add[S](s: var CharBuf[S], x: char) =
+  s.buf[s.pos] = x
+  inc s.pos
+  if s.pos >= S:
+    s.flush()
+
+proc add[S](s: var CharBuf[S], x: cstring) =
+  for i in 0 .. int.high:
+    if x[i] == '\0': return
+    s.add x[i]
 
 macro includeIt: stmt =
   const file = staticExec("echo $file")
