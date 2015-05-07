@@ -7,8 +7,7 @@ ehdr:
     db  0x7F, "ELF"  ; magic
     db 1, 1, 1, 0    ; 32-bits, little endian, version 1
 
-    ; This padding is a perfect place to put a string constant!
-    db "Hello!", 0x0A, 0
+    times 8 db 0     ; padding
 
     dw  2            ; e_type
     dw  3            ; e_machine = x86
