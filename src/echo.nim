@@ -1,11 +1,9 @@
-import stdlib
-
-proc main(argc: cint, argv: cstringArray): cint {.exportc.} =
+proc main(argc: int, argv: cstringArray): int =
   var
     start = 1
     newLine = true
 
-  if strcmp(argv[start], "-n") == 0:
+  if argc > 1 and strcmp(argv[start], "-n") == 0:
     inc start
     newLine = false
 
@@ -16,4 +14,3 @@ proc main(argc: cint, argv: cstringArray): cint {.exportc.} =
 
   if newLine:
     stdout.write "\n", 1
-  exit 0

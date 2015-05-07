@@ -2,7 +2,7 @@
 
 .global _start
 .type   _start,%function
-.type   main,%function
+.type   stdmain,%function
 
 _start:
   xorl %ebp, %ebp
@@ -11,4 +11,4 @@ _start:
   andq $~15, %rsp    /* Align the stack to a 16 byte boundary */
   pushq %rax         /* Push garbage */
   pushq %rsp         /* Provide highest stack address to user code */
-  call main
+  call stdmain

@@ -6,6 +6,13 @@ const
 
 type Platform = enum x86, x86_64
 
+proc clean =
+  removeDir "bin"
+  removeDir "nimcache"
+  removeDir "src/nimcache"
+  removeFile "payload"
+  removeFile "payload.bin"
+
 proc build(platform: Platform) =
   let
     scriptFile = "tools" / $platform / "script.ld"
@@ -24,16 +31,21 @@ proc build(platform: Platform) =
   for file in walkFiles "src/*.nim":
     let
       (_, name, ext) = splitFile file
-      objFile = "src/nimcache" / name & ".o"
-      objStdlibFile = "src/nimcache/stdlib.o"
+      #objFile = "src/nimcache" / name & ".o"
+      objFile = "src/nimcache/framework.o"
       objStartFile = "src/nimcache/start.o"
       outFile = "bin" / $platform / name
 
-    if name in ["panicoverride", "stdlib"]:
+    removeFile objStartFile
+
+    if name in ["panicoverride", "framework"]:
       continue
 
-    direShell nim, "--verbosity:0 --hints:off --parallelBuild:1 --nolinking --os:standalone -d:release --opt:size --noMain --passC:-ffunction-sections --passC:-fdata-sections c", file
-    direShell ld, "--gc-sections -e _start -T", scriptFile, "-o", payloadFile, objFile, objStdlibFile, objStartFile
+    direShell nim, "--verbosity:0 --hints:off --parallelBuild:1 --nolinking --os:standalone -d:release --opt:size --noMain --passC:-ffunction-sections --passC:-fdata-sections --putEnv:file=" & name, "c src/framework.nim"
+    if fileExists objStartFile:
+      direShell ld, "--gc-sections -e _start -T", scriptFile, "-o", payloadFile, objFile, objStartFile
+    else:
+      direShell ld, "--gc-sections -e _start -T", scriptFile, "-o", payloadFile, objFile
     direShell "objcopy -j combined -O binary", payLoadFile, payLoadBin
 
     var entry: string
@@ -45,18 +57,17 @@ proc build(platform: Platform) =
     inclFilePermissions outFile, {fpUserExec, fpGroupExec, fpOthersExec}
 
 task "clean", "Clean up build directories":
-  removeDir "bin"
-  removeDir "nimcache"
-  removeDir "src/nimcache"
-  removeFile "payload"
-  removeFile "payload.bin"
+  clean()
 
 task "all", "Build the small coreutils for x86-64 and x86":
-  build x86_64
-  build x86
+  clean()
+  build(x86_64)
+  build(x86)
 
 task "x86", "Build the small coreutils for x86":
-  build x86
+  clean()
+  build(x86)
 
 task "x86_64", "Build the small coreutils for x86_64":
-  build x86_64
+  clean()
+  build(x86_64)

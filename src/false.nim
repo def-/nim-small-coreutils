@@ -1,4 +1,1 @@
-import stdlib
-
-proc main(argc: cint, argv: cstringArray): cint {.exportc.} =
-  exit 1
+proc main: int = 1

@@ -6,4 +6,4 @@ This uses the methods from [my blog post](http://hookrace.net/blog/nim-binary-si
 | ---- | ----------:| --------:| -----------:|
 | true |      27 KB |     97 B |       129 B |
 | false|      27 KB |     97 B |       132 B |
-| echo |      31 KB |    319 B |       334 B |
+| echo |      31 KB |    356 B |       381 B |

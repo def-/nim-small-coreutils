@@ -2,7 +2,7 @@
 
 .global _start
 .type   _start,%function
-.type   main,%function
+.type   stdmain,%function
 
 _start:
   xorl %ebp, %ebp
@@ -13,4 +13,4 @@ _start:
   pushl %esp         /* Provide highest stack address to user code */
   pushl %ecx         /* argv */
   pushl %esi         /* argc */
-  call main
+  call stdmain
