@@ -31,12 +31,11 @@ proc build(platform: Platform) =
   for file in walkFiles "src/*.nim":
     let
       (_, name, ext) = splitFile file
-      #objFile = "src/nimcache" / name & ".o"
       objFile = "src/nimcache/framework.o"
       objStartFile = "src/nimcache/start.o"
       outFile = "bin" / $platform / name
 
-    removeFile objStartFile
+    removeDir "src/nimcache"
 
     if name in ["panicoverride", "framework"]:
       continue

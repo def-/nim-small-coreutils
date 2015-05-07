@@ -58,5 +58,9 @@ else:
   else:
     {.error: "No _start defined for this architecture".}
 
-  proc stdmain(argc: cint, argv: cstringArray) {.exportc, noreturn.} =
-    exit main(argc.int, argv).cint
+  proc stdmain(argc: cint, argv: cstringArray) {.exportc.} =
+    when compiles(main(argc.int, argv)):
+      exit main(argc.int, argv).cint
+    else:
+      let envp = cast[cstringArray](addr argv[argc + 1])
+      exit main(argc.int, argv, envp).cint
